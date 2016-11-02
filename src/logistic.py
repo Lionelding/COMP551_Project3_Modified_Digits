@@ -1,15 +1,27 @@
+'''
+900		half		'../data/logi0-100000' 		0.13157		0.08420
+1600	full bi 	'../data/logi_full_bi'		0.20442		0.07700
+400 	crop20 		'../data/logi_crop20'		0.13358		0.10760
+9 		crop20_hog 	'../data/logi_crop20_hog' 	0.10558		0.10600
+144		hog			'../data/logi_hog'			0.10501
+100x3 0.2806
+100x4 0.3121
+100x5 0.3647
+100x6 0.3685
+
+200x5 0.3827
+300x5 0.4245
+'''
 import numpy as np
 import csv
 from sklearn import svm, linear_model, naive_bayes 
 import scipy.misc # to visualize only
 from scipy.ndimage.interpolation import zoom
-from skimage.feature import hog
+#from skimage.feature import hog
 import cv2
 
-<<<<<<< HEAD
 problems=[]
-=======
->>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
+
 def generate_Y():
 	f1='../data/train_y.csv'
 	new_rows = []
@@ -59,22 +71,18 @@ def write_predictions(Y_te,txt):
 		spamwriter.writerows(Yw)
 
 def auto_crop(X,output_size=20):
-<<<<<<< HEAD
 	global problems
 	#X = X_tr[10451]
 	#X = problems[0]
 	img = X #zoom(a,0.5)
 	im = img[5:55,5:55]
 	#img0 = im.copy()
-=======
 	img = X #zoom(a,0.5)
 	im = img[5:55,5:55]
->>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
 	# Convert to grayscale and apply Gaussian filtering
 	#im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 	im_gray = cv2.GaussianBlur(im, (5, 5), 0)
 	# Threshold the image
-<<<<<<< HEAD
 	#ret, im_th = cv2.adaptiveThreshold(im_gray, 255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,11,2)
 	#
 	#-80
@@ -103,7 +111,6 @@ def auto_crop(X,output_size=20):
 	#im_th = cv2.adaptiveThreshold(im_th,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,51,-50)
 	return im_th
 	#scipy.misc.imshow(im_th)
-=======
 	ret, im_th = cv2.threshold(im_gray, 200, 255, cv2.THRESH_BINARY_INV)
 	#
 	if(im_th.sum(axis=0)[0]<=10*255):
@@ -121,35 +128,38 @@ def auto_crop(X,output_size=20):
 	im_th = scipy.misc.imresize(im_th, (output_size, output_size))
 	return im_th
 #scipy.misc.imshow(im_th)
->>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
 
 
 '''
 X_tr = np.fromfile('../data/train_x.bin', dtype='uint8')
 X_tr = X_tr.reshape((100000,60,60))
 #scipy.misc.imshow(X_tr[1]) # to visualize only
-<<<<<<< HEAD
 X = np.zeros((100000,20,20))
 problems=[]
 for i,img in enumerate(X_tr):
 	X[i] = auto_crop(img)
-=======
-X = np.zeros((100000,30,30))
-for i,img in enumerate(X_tr):
-	X[i] = small(img)
->>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
-	print i
-
-from skimage.feature import hog
+	i
 
 Y_tr = generate_Y()
-X=X.reshape((100000,900))
-logistic = linear_model.LogisticRegression(C=1e5)
+X=X.reshape((100000,400))
+#logistic = linear_model.LogisticRegression(C=1e5)
+#logistic.fit(X, Y_tr)
+
+from sklearn.neural_network import MLPClassifier
+logistic = MLPClassifier(hidden_layer_sizes=(100, 100))#solver='lbfgs',alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
 logistic.fit(X, Y_tr)
 
+logistic = MLPClassifier(hidden_layer_sizes=(400, 400, 400, 400,400))#solver='lbfgs',alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
+logistic.fit(X[0:90000], Y_tr[0:90000])
+accuracy(logistic.predict(X[90000:100000]),Y_tr[90000:100000])
+#0.1973
+
+accuracy(logistic.predict(X[90000:100000]),Y_tr[90000:100000])
+
 import pickle
-with open('../data/logi0-100000', 'wb') as output:
+with open('../data/neural(100,100)_crop20', 'wb') as output:
 	pickle.dump(logistic, output, pickle.HIGHEST_PROTOCOL)
+
 
 with open('../data/logi0-100000', 'rb') as input:
 	logistic=pickle.load(input)
@@ -158,12 +168,12 @@ X_te = np.fromfile('../data/test_x.bin', dtype='uint8')
 
 X_te = X_te.reshape((20000,60,60))
 #scipy.misc.imshow(X_tr[1]) # to visualize only
-X = np.zeros((20000,30,30))
+X = np.zeros((20000,20,20))
 for i,img in enumerate(X_te):
-	X[i] = small(img)
+	X[i] = auto_crop(img)
 	print i
 
-X=X.reshape((20000,900))
+X=X.reshape((20000,400))
 
 Y_te=logistic.predict(X)
 
