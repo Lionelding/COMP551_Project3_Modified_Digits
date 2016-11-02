@@ -6,6 +6,10 @@ from scipy.ndimage.interpolation import zoom
 from skimage.feature import hog
 import cv2
 
+<<<<<<< HEAD
+problems=[]
+=======
+>>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
 def generate_Y():
 	f1='../data/train_y.csv'
 	new_rows = []
@@ -55,12 +59,51 @@ def write_predictions(Y_te,txt):
 		spamwriter.writerows(Yw)
 
 def auto_crop(X,output_size=20):
+<<<<<<< HEAD
+	global problems
+	#X = X_tr[10451]
+	#X = problems[0]
 	img = X #zoom(a,0.5)
 	im = img[5:55,5:55]
+	#img0 = im.copy()
+=======
+	img = X #zoom(a,0.5)
+	im = img[5:55,5:55]
+>>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
 	# Convert to grayscale and apply Gaussian filtering
 	#im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 	im_gray = cv2.GaussianBlur(im, (5, 5), 0)
 	# Threshold the image
+<<<<<<< HEAD
+	#ret, im_th = cv2.adaptiveThreshold(im_gray, 255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,11,2)
+	#
+	#-80
+	im_th = cv2.adaptiveThreshold(im_gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,51,-50)
+	if(im_th.sum(axis=0).sum()<=10000):
+		im_th = cv2.adaptiveThreshold(im_gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,51,-20)
+	#
+	if(im_th.sum(axis=0).sum()<=10000):
+		im_th = cv2.adaptiveThreshold(im_gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,51,-10)
+	#
+	im_gray2 = cv2.GaussianBlur(im_th, (5, 5), 0)
+	ret,im_th = cv2.threshold(im_gray2,150,255,cv2.THRESH_TOZERO)
+	#if(im_th.sum(axis=0).sum()>=600000):
+	#	ret, im_th = cv2.threshold(im_gray, 250, 255, cv2.THRESH_BINARY_INV)
+	image_data_bw = im_th
+	#
+	non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
+	non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
+	im_th2 = im_th[non_empty_rows,:]
+	im_th = im_th2[:,non_empty_columns]
+	if(im_th.shape[0]>45 or im_th.shape[0]<17 ):
+		problems.append(X)
+	#cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
+	#im_th = image_data_bw[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1]
+	im_th = scipy.misc.imresize(im_th, (output_size, output_size))
+	#im_th = cv2.adaptiveThreshold(im_th,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,51,-50)
+	return im_th
+	#scipy.misc.imshow(im_th)
+=======
 	ret, im_th = cv2.threshold(im_gray, 200, 255, cv2.THRESH_BINARY_INV)
 	#
 	if(im_th.sum(axis=0)[0]<=10*255):
@@ -78,15 +121,23 @@ def auto_crop(X,output_size=20):
 	im_th = scipy.misc.imresize(im_th, (output_size, output_size))
 	return im_th
 #scipy.misc.imshow(im_th)
+>>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
 
 
 '''
 X_tr = np.fromfile('../data/train_x.bin', dtype='uint8')
 X_tr = X_tr.reshape((100000,60,60))
 #scipy.misc.imshow(X_tr[1]) # to visualize only
+<<<<<<< HEAD
+X = np.zeros((100000,20,20))
+problems=[]
+for i,img in enumerate(X_tr):
+	X[i] = auto_crop(img)
+=======
 X = np.zeros((100000,30,30))
 for i,img in enumerate(X_tr):
 	X[i] = small(img)
+>>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
 	print i
 
 from skimage.feature import hog
@@ -131,6 +182,24 @@ h = hog.compute(im)
 im3 = scipy.misc.imresize(X_tr[0], (80, 80))
 
 
+<<<<<<< HEAD
+a = X_tr[5].copy()
+#a = small(a)
+
+a2 = cv2.GaussianBlur(a, (5, 5), 0)
+	# Threshold the image
+ret, a2 = cv2.threshold(a2, 200, 255, cv2.THRESH_BINARY_INV)
+
+#thresh = cv2.adaptiveThreshold(a2,255,1,1,11,2)
+contours,hierarchy = cv2.findContours(a2,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+#cnt = contours[0]
+for cnt in contours:
+	if cv2.contourArea(cnt)>5:
+		cnt = contours[2]
+		[x,y,w,h] = cv2.boundingRect(cnt)
+
+a2 = a[y:y+h,x:x+w]
+=======
 a = X_tr[4].copy()
 a = small(a)
 thresh = cv2.adaptiveThreshold(a,255,1,1,11,2)
@@ -145,6 +214,7 @@ for cnt in contours:
         h
 
 a2 = a[x:x+w,y:y+h]
+>>>>>>> 67daec0c57002079012682b1e76393b1ec2e9689
 scipy.misc.imshow(a2)
 
 
